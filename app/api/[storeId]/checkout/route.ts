@@ -5,7 +5,7 @@ import { stripe } from "@/lib/stripe";
 import prismadb from "@/lib/prismadb";
 
 const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": `${process.env.FRONTEND_STORE_URL}`,
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
@@ -45,6 +45,8 @@ export async function POST(
                 unit_amount: product.price.toNumber() * 100
             }
         });
+
+
     });
 
     const order = await prismadb.order.create({
@@ -55,7 +57,7 @@ export async function POST(
                 create: productIds.map((productId: string) => ({
                     product: {
                         connect: {
-                            id: productId
+                            id: productId,
                         }
                     }
                 }))
@@ -73,11 +75,11 @@ export async function POST(
         success_url: `${process.env.FRONTEND_STORE_URL}/cart?success=1`,
         cancel_url: `${process.env.FRONTEND_STORE_URL}/cart?canceled=1`,
         metadata: {
-            orderId: order.id
+            orderId: order.id,
         },
     });
 
     return NextResponse.json({ url: session.url }, {
-        headers: corsHeaders
+        headers: corsHeaders,
     });
 }
